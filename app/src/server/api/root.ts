@@ -1,9 +1,10 @@
 import { createCallerFactory, createTRPCRouter, t } from "~/server/api/trpc";
 import { atlasRouter } from "./routers/atlas";
 import EventEmitter, { on } from "node:events";
-import type { DNSResponse } from "./schemas/dnsResponseSchema";
-import "./ServerCache"
+import type { DnsResponse } from "./schemas/dnsResponseSchema";
+import "../dataStore/dataStore"
 import { probeRouter } from "./routers/probe";
+import type { Probe } from "./schemas/db";
 
 /**
  * This is the primary router for your server.
@@ -21,7 +22,7 @@ export const appRouter = createTRPCRouter({
     for await (const [data] of on(ee, 'update', {
         signal: opts.signal
     })) {
-        yield data as DNSResponse;
+        yield data as {measurement: DnsResponse, probes: Probe[]};
     }
   })
 });

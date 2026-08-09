@@ -9,17 +9,17 @@ export const dnsResponseResultSetSchema = z.object({
 })
 
 export const dnsResponseProbeSchema = z.object({
-    resultset: dnsResponseResultSetSchema,
+    resultset: z.array(dnsResponseResultSetSchema),
     prb_id: z.number()
 })
 
 // invalid probes are silently discarded, repsonse from api is rather messy 
 export const dnsResponseSchema = z.array(z.unknown()).transform((list) => {
-    list.flatMap((probe) => {
+    return list.flatMap((probe) => {
         const result = dnsResponseProbeSchema.safeParse(probe)
         return result.success ? [result.data] : []
     })
 })
 
-export type DNSResponse = z.infer<typeof dnsResponseSchema>
-export type dnsResponseResultSet = z.infer<typeof dnsResponseResultSetSchema>
+export type DnsResponse = z.infer<typeof dnsResponseSchema>
+export type DnsResponseResultSet = z.infer<typeof dnsResponseResultSetSchema>

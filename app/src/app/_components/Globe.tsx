@@ -12,6 +12,7 @@ import { useThree, Canvas, extend } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import countries from "public/data/globedata.json";
 import type { Position, GlobeConfig } from "../utils/globeTypes";
+import { useLiveData } from "../hooks/useLiveData";
 declare module "@react-three/fiber" {
   interface ThreeElements {
     threeGlobe: ThreeElements["mesh"] & (new () => ThreeGlobe);
@@ -49,7 +50,12 @@ export function Globe({globeConfig}: {globeConfig: GlobeConfig}) {
   };
 
   const data: Position[] = useMemo(() => [], []);
- 
+  const liveData = useLiveData();
+
+  useEffect(() => {
+    console.log(liveData)
+  }, [liveData])
+
   // Initialize globe only once
   useEffect(() => {
     if (!globeRef.current && groupRef.current) {
