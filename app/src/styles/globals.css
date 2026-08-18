@@ -10,7 +10,7 @@
   50% { opacity: 1; }
 }
 
-.twinkle-star {
+.star {
   animation-name: twinkle;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
