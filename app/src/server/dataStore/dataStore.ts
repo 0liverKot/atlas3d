@@ -9,7 +9,7 @@ interface DataStore {
 
     popularDomains: {
         measurement: DnsResponse | null 
-        probes: Probe[]
+        probes: Map<number, Probe>
     }
 }
 
@@ -17,7 +17,7 @@ const store: DataStore = {
     
     popularDomains: {
         measurement: null,
-        probes: []
+        probes: new Map
     }
 }
 
@@ -29,8 +29,10 @@ export async function updateCache() {
 
         const probeIds = findMissingProbes(store.popularDomains.measurement, store.popularDomains.probes);
         
-        const probes = await getProbes(probeIds)        
-        store.popularDomains.probes = probes
+        const probes = await getProbes(probeIds)
+        probes.forEach((probe) => {
+            store.popularDomains.probes.set(probe.id, probe)
+        })     
         
         ee.emit('update', store.popularDomains)
     
