@@ -5,8 +5,8 @@
 */
 
 "use client";
-import { useEffect, useRef, useState, memo, useMemo } from "react";
-import { Color, Scene, Fog, PerspectiveCamera, Vector3, Group } from "three";
+import React, { useEffect, useRef, useState, memo, useMemo } from "react";
+import { Color, Scene, Fog, PerspectiveCamera, Vector3, Group, Raycaster, Sphere, Vector2 } from "three";
 import ThreeGlobe from "three-globe";
 import { useThree, Canvas, extend } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
@@ -230,9 +230,11 @@ export function WebGLRendererConfig() {
  
   return null;
 }
- 
+
+
 export const  World = memo(function World({ globeConfig }: {globeConfig: GlobeConfig}) {
   const scene = new Scene();
+
   scene.fog = new Fog(0xffffff, 400, 2000);
   return (
     <Canvas scene={scene} camera={new PerspectiveCamera(50, aspect, 180, 1800)}>

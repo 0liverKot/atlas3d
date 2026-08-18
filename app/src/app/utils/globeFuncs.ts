@@ -15,7 +15,7 @@ export function transformToPoints(data: PopularDomains): GlobePoint[] {
             lat: probe.latitude,
             lng: probe.longitude,
             color: '#ffffff',
-            size: 0.4
+            size: 0.2
         }
         globePoints.push(globePoint)
     })
