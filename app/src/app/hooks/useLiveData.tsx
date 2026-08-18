@@ -1,4 +1,4 @@
-'useClient'
+'use client'
 import { useSyncExternalStore } from "react"
 import { liveData } from "../utils/liveData"
 

@@ -22,7 +22,7 @@ export const appRouter = createTRPCRouter({
     for await (const [data] of on(ee, 'update', {
         signal: opts.signal
     })) {
-        yield data as {measurement: DnsResponse, probes: Probe[]};
+        yield data as {measurement: DnsResponse, probes: Map<number, Probe>};
     }
   })
 });

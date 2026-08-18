@@ -12,7 +12,8 @@ import { useThree, Canvas, extend } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import countries from "public/data/globedata.json";
 import type { Position, GlobeConfig } from "../utils/globeTypes";
-import { useLiveData } from "../hooks/useLiveData";
+import { liveData } from "../utils/liveData";
+import { transformToPoints } from "../utils/globeFuncs";
 declare module "@react-three/fiber" {
   interface ThreeElements {
     threeGlobe: ThreeElements["mesh"] & (new () => ThreeGlobe);
@@ -49,12 +50,24 @@ export function Globe({globeConfig}: {globeConfig: GlobeConfig}) {
     ...globeConfig,
   };
 
+  // placeholder for the initial mounting 
   const data: Position[] = useMemo(() => [], []);
-  const liveData = useLiveData();
-
+  
   useEffect(() => {
-    console.log(liveData)
-  }, [liveData])
+    if (!globeRef.current) return; 
+
+    const updateGlobe = () => {
+        const data = liveData.getSnapshot();
+        if (!data) return;
+
+        const points = transformToPoints(data);
+        globeRef.current?.pointsData(points);
+    }
+
+    updateGlobe();
+    return liveData.subscribe(updateGlobe)
+
+}, [isInitialized])
 
   // Initialize globe only once
   useEffect(() => {
@@ -150,7 +163,7 @@ export function Globe({globeConfig}: {globeConfig: GlobeConfig}) {
       .pointColor((e) => (e as { color: string }).color)
       .pointsMerge(true)
       .pointAltitude(0.0)
-      .pointRadius(2);
+      .pointRadius((e) => (e as {size: number }).size);
  
     globeRef.current
       .ringsData([])

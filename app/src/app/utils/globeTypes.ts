@@ -7,7 +7,14 @@ export type Position = {
   arcAlt: number;
   color: string;
 };
- 
+
+export type GlobePoint = {
+    lat: number;
+    lng: number;
+    color: string;
+    size: number
+}
+
 export type GlobeConfig = {
   pointSize?: number;
   globeColor?: string;
