@@ -1,17 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+    --color-darkprimary: hsl(240 100% 5%);
+    --color-primary: hsl(240 100% 10%);
+    --color-secondary: hsl(240 100% 15%);
+
 }
 
 @keyframes twinkle {
-  0%, 100% { opacity: 0.15; }
-  50% { opacity: 1; }
+    0%, 100% { opacity: 0.15; }
+    50% { opacity: 1; }
 }
 
 .star {
-  animation-name: twinkle;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+    animation-name: twinkle;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
 }
+
+.primary-text {
+    font-size: 1rem;
+    font-weight: 400;
+    color: hsl(0, 0%, 100);
+}
+
+

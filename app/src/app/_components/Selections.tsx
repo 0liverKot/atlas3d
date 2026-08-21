@@ -2,7 +2,7 @@
 
 export default function Selections() {
     return (
-        <div className="basis-1/4 bg-gray-900 w-3/4 h-full rounded-xl relative">
+        <div className="bg-primary primary-text basis-1/4 w-3/4 h-3/4 rounded-xl relative">
             Selections
         </div>
     )

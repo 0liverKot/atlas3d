@@ -1,6 +1,6 @@
 /*
 
--- From AceternityUI 
+-- From AceternityUI + a few changes  
 
 */
 
