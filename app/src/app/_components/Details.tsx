@@ -3,6 +3,7 @@
 import type { DnsResponse } from "~/server/api/schemas/dnsResponseSchema"
 import { useLiveData } from "../hooks/useLiveData"
 import { useEffect, useState } from "react"
+import type { Probe } from "~/server/api/schemas/db"
 
 // returns sorted array of the RTTS for eahc probes results
 const getRtts = (data: DnsResponse | null): number[] => {
@@ -20,6 +21,11 @@ const getRtts = (data: DnsResponse | null): number[] => {
     }).sort()
 }
 
+const matchingProbes = (measurementProbeIds: number[], probes: Map<number, Probe>) => {
+    return measurementProbeIds.filter((id) => probes.has(id))
+    
+} 
+
 export default function Details() {
     
     const [probesDisplayed, setProbesDisplayed] = useState(0)
@@ -30,17 +36,23 @@ export default function Details() {
 
     const data = useLiveData()
     useEffect(() => {
-        if(!data) return 
+        if(!data?.measurement) return 
 
         const rtts = getRtts(data.measurement)
         const min = rtts.at(0) 
         const max = rtts.at(rtts.length - 1)
         const mean = rtts.reduce((partialSum, x) => partialSum + x, 0) / rtts.length
 
+        const displayed = matchingProbes(data.measurement.map((elem) => elem.prb_id), data.probes);
+        const displayedCount = displayed.length
+        const missingCount = data.measurement.length - displayedCount
+
         if (min && max) {
             setMinRTT(min)
             setMaxRTT(max)
             setMeanRTT(mean)
+            setProbesDisplayed(displayedCount)
+            setUnavailableProbes(missingCount)
         }
     }, [data])
 
