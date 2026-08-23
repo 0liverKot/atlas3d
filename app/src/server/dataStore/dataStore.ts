@@ -29,11 +29,12 @@ export async function updateCache() {
 
         const probeIds = findMissingProbes(store.popularDomains.measurement, store.popularDomains.probes);
         
-        const probes = await getProbes(probeIds)
-        probes.forEach((probe) => {
-            store.popularDomains.probes.set(probe.id, probe)
-        })     
-        
+        if (probeIds.length > 0) {
+            const probes = await getProbes(probeIds)
+            probes.forEach((probe) => {
+                store.popularDomains.probes.set(probe.id, probe)
+            })     
+        }
         ee.emit('update', store.popularDomains)
     
     }catch(err) {
@@ -43,7 +44,7 @@ export async function updateCache() {
 
 async function poll() {
     await updateCache()
-    setTimeout(() => { void poll() }, 120000)
+    setTimeout(() => { void poll() }, 10000)
 }
 
 void poll()
