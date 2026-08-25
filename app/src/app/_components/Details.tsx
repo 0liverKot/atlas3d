@@ -169,7 +169,7 @@ export default function Details() {
     }
     
     return (
-        <div className="bg-primary primary-text basis-1/4 w-3/5 h-3/4 rounded-xl relative py-8 px-8 flex flex-col gap-5 overflow-hidden">
+        <div className="bg-primary primary-text basis-1/4 w-3/5 h-3/4 rounded-xl relative py-8 px-8 flex flex-col gap-5 overflow-hidden shadow-xl/30">
 
             {!data && <div className="text-neutral-400">loading...</div>}
             {data &&
