@@ -11,13 +11,16 @@ const PAGESIZE = 10
 const getRtts = (data: DnsResponse | null): number[] => {
     if (!data) return []
 
-    return data.map((element) => {
+    const rtts = data.map((element) => {
         let total = 0;
         element.resultset.forEach((set) => {
             total += set.result.rt
         })
         return total / element.resultset.length
     }).sort()
+
+    // filter out zeros since it prevents rerenders
+    return rtts.filter((rtt) => rtt > 0);
 }
 
 
