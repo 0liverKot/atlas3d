@@ -44,7 +44,7 @@ export async function updateCache() {
 
 async function poll() {
     await updateCache()
-    setTimeout(() => { void poll() }, 10000)
+    setTimeout(() => { void poll() }, 1000)
 }
 
 void poll()

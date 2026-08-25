@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-    --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+    --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
     --color-darkprimary: hsl(240 100% 5%);
@@ -21,10 +21,47 @@
     animation-iteration-count: infinite;
 }
 
+.header {
+    font-size: 1.125rem;
+    font-weight: 400;
+    color: hsl(0, 0%, 80%);
+}
+
 .primary-text {
     font-size: 1rem;
     font-weight: 400;
-    color: hsl(0, 0%, 100);
+    color: hsl(0, 0%, 100%);
 }
 
+.secondary-text {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: hsl(0, 0%, 80%);
+}
 
+.stat-label {
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: hsl(0, 0%, 55%);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tab {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    background-color: hsl(240, 100%, 15%);
+    color: hsl(0, 0%, 60%);
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.tab:hover {
+    background-color: hsl(240, 100%, 20%);
+    color: hsl(0, 0%, 90%);
+}
+
+.tab-active {
+    background-color: hsl(240, 100%, 25%);
+    color: hsl(0, 0%, 100%);
+}
