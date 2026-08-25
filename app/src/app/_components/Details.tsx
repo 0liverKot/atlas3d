@@ -171,10 +171,10 @@ export default function Details() {
             {!data && <div className="text-neutral-400">loading...</div>}
             {data &&
             <>
-                <div className="header">Measure of popular domains</div>
+                <div className="header">Popular domains</div>
                 <div className="w-full h-px bg-white/10" />
 
-                    <div className="bg-secondary rounded-lg p-3 flex flex-col items-center">
+                    <div className="p-3 flex flex-col items-center">
                         <span className="text-2xl font-semibold">{probesDisplayed}</span>
                         <span className="stat-label mt-1">Probes Online</span>
                         <span className="text-xs mt-1">{renderDelta(probeDeltaLiteral, true)}</span>
@@ -183,17 +183,17 @@ export default function Details() {
                 <div>
                     <div className="secondary-text mb-2">Response Time</div>
                     <div className="grid grid-cols-3 gap-3">
-                        <div className="bg-secondary rounded-lg p-3 flex flex-col items-center">
+                        <div className="p-3 flex flex-col items-center">
                             <span className="stat-label">Min</span>
                             <span className="text-lg font-medium mt-1">{formatRtt(minRTT)}</span>
                             <span className="text-xs mt-1">{renderDelta(rttDeltas.min)}</span>
                         </div>
-                        <div className="bg-secondary rounded-lg p-3 flex flex-col items-center">
+                        <div className="p-3 flex flex-col items-center">
                             <span className="stat-label">Mean</span>
                             <span className="text-lg font-medium mt-1">{formatRtt(meanRTT)}</span>
                             <span className="text-xs mt-1">{renderDelta(rttDeltas.mean)}</span>
                         </div>
-                        <div className="bg-secondary rounded-lg p-3 flex flex-col items-center">
+                        <div className="p-3 flex flex-col items-center">
                             <span className="stat-label">Max</span>
                             <span className="text-lg font-medium mt-1">{formatRtt(maxRTT)}</span>
                             <span className="text-xs mt-1">{renderDelta(rttDeltas.max)}</span>

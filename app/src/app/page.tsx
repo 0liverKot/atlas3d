@@ -1,7 +1,7 @@
 'use client';
 import NotificationListener from "./_components/NotificationListener";
 import AtlasGlobe from "./_components/AtlasGlobe";
-import Selections from "./_components/Selections";
+import Selections from "./_components/Measurements";
 import Details from "./_components/Details";
 import dynamic from "next/dynamic";
 
