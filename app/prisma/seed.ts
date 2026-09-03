@@ -1,11 +1,56 @@
 import { PrismaClient } from "../generated/prisma";
+import { readFile } from "node:fs/promises";
 
-const db = new PrismaClient();
+const RESULTS_FILE = "prisma/traceroute-results.json";
+const TRACEROUTES_FILE = "prisma/cleanedtraceroutes.txt";
+const BATCH_SIZE = 50;
+
+type TraceRouteResult = {
+    fw: number;
+    prb_id: number;
+    result: {
+        hop: number;
+        result: [{
+            from: string;
+            rtt: number;
+        }];
+    };
+}[];
+
+type TraceRouteMetadata = {
+    id: number;
+    domain: string;
+    probes: number;
+};
+
+type TraceRoute = {
+    id: number;
+    domain: string;
+    probes: number;
+    results: TraceRouteResult;
+};
 
 type Probe = {
     id: number;
     status: { id: number }
     geometry: { coordinates: [number, number] };
+}
+
+async function loadMetadata(): Promise<Map<number, TraceRouteMetadata>> {
+    const data = await readFile(TRACEROUTES_FILE, "utf8");
+    const map = new Map<number, TraceRouteMetadata>();
+
+    for (const line of data.split("\n").filter(l => l.trim())) {
+        const id = parseInt(line.split("|")[0]?.split(":")[1]?.trim() ?? "");
+        const domain = line.split("|")[1]?.split(":")[1]?.trim() ?? "";
+        const probes = parseInt(line.split("|")[2]?.split(":")[1]?.trim() ?? "");
+
+        if (!isNaN(id) && domain && !isNaN(probes)) {
+            map.set(id, { id, domain, probes });
+        }
+    }
+
+    return map;
 }
 
 async function getAllProbes(): Promise<Probe[]> {
@@ -30,20 +75,55 @@ async function getAllProbes(): Promise<Probe[]> {
 }
 
 async function main() {
-    const probes = await getAllProbes();
-    const data = probes.
-        filter((p) => p.status.id === 1 && p.geometry).// only use probes that are connected and have a location listed
-        map((p) => ({
-            id: p.id,
-            latitude: p.geometry.coordinates[1],
-            longitude: p.geometry.coordinates[0],
-        }))
+    const db = new PrismaClient();
 
-        const { count } = await db.probe.createMany({ data, skipDuplicates: true});
-        console.log(`Seeding complete, ${count} probes added`)
+    try {
+        /*
+        const probes = await getAllProbes();
+        const data = probes.
+            filter((p) => p.status.id === 1 && p.geometry).// only use probes that are connected and have a location listed
+            map((p) => ({
+                id: p.id,
+                latitude: p.geometry.coordinates[1],
+                longitude: p.geometry.coordinates[0],
+            }))
+
+            const { count } = await db.probe.createMany({ data, skipDuplicates: true});
+            console.log(`Seeding complete, ${count} probes added`)
+        */
+
+        const metadata = await loadMetadata();
+        const results = JSON.parse(await readFile(RESULTS_FILE, "utf8")) as Record<string, TraceRouteResult>;
+
+        const entries = Object.entries(results);
+        console.log(`Seeding ${entries.length} traceroutes in batches of ${BATCH_SIZE}...`);
+
+        let totalSeeded = 7;
+
+        for (let i = 344; i < entries.length; i += BATCH_SIZE) {
+            const batch = entries.slice(i, i + BATCH_SIZE)
+                .map(([idStr, result]) => {
+                    const id = parseInt(idStr);
+                    const meta = metadata.get(id);
+                    if (!meta) return null;
+                    return { id, domain: meta.domain, probes: meta.probes, results: result };
+                })
+                .filter((t): t is TraceRoute => t !== null);
+
+            if (batch.length === 0) continue;
+
+            const { count } = await db.traceRoute.createMany({ data: batch, skipDuplicates: true });
+            totalSeeded += count;
+            console.log(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${count} seeded (${totalSeeded} total)`);
+        }
+
+        console.log(`Seeding complete, ${totalSeeded} traceroutes added`);
+    } finally {
+        await db.$disconnect();
+    }
 }
 
 main().catch((e) => {
-    console.error(e)
-    process.exit(1)
-}).finally(() => db.$disconnect());
+    console.error(e);
+    process.exit(1);
+});

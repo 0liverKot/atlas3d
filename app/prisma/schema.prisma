@@ -17,4 +17,11 @@ model Probe {
     longitude Float
 }
 
+model TraceRoute {
+    id Int @id
+    domain String
+    probes Int
+    results Json
+}
+
 
