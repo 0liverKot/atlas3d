@@ -12,9 +12,12 @@
 /prisma/db.sqlite
 /prisma/db.sqlite-journal
 db.sqlite
-/prisma/fetch-progress.json
+/prisma/fetch-traceroute-progress.json
 /prisma/traceroute-results.json
 /prisma/cleanedtraceroutes.txt
+/prisma/domains.txt
+/prisma/fetch-ping-progress.json
+/prisma/ping-results.json
 
 # next.js
 /.next/

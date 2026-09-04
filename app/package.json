@@ -20,7 +20,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "db:seed": "prisma db seed",
-    "fetch-data": "tsx prisma/fetch-data.ts"
+    "fetch-traceroutes": "tsx prisma/fetch-traceroutes.ts",
+    "fetch-pings": "tsx prisma/fetch-pings.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",

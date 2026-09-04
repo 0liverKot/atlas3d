@@ -1,29 +1,43 @@
 import { readFile, writeFile } from "node:fs/promises";
 
-const RESULTS_FILE = "prisma/traceroute-results.json";
-const PROGRESS_FILE = "prisma/fetch-progress.json";
+const RESULTS_FILE = "prisma/ping-results.json";
+const PROGRESS_FILE = "prisma/fetch-ping-progress.json";
 const DELAY_MS = 100;
 
-type TraceRouteResult = {
+type TimeoutResult = {
+  type: "Timeout";
+  x: string;
+};
+
+type ErrorResult = {
+  type: "Error";
+  error: string;
+};
+
+type ReplyResult = {
+  type: "Reply";
+  rtt: number;
+};
+
+type PingProbeResult = TimeoutResult | ErrorResult | ReplyResult
+
+type PingResult = {
     fw: number;
     prb_id: number;
-    result: {
-        hop: number;
-        result: [{
-            from: string;
-            rtt: number;
-        }];
-    };
+    min: number;
+    avg: number;
+    max: number;
+    result: PingProbeResult[]
 }[];
 
-type TraceRouteData = {
+type Ping = {
     id: number;
     domain: string;
     probes: number;
-};
+}
 
-async function parseTraceroutes(): Promise<TraceRouteData[]> {
-    const data = await readFile("prisma/cleanedtraceroutes.txt", "utf8");
+async function parseDomains(): Promise<Ping[]> {
+    const data = await readFile("prisma/domains.txt", "utf-8")
 
     return data
         .split("\n")
@@ -34,28 +48,6 @@ async function parseTraceroutes(): Promise<TraceRouteData[]> {
             probes: parseInt(line.split("|")[2]?.split(":")[1]?.trim() ?? ""),
         }))
         .filter(t => !isNaN(t.id) && t.domain && !isNaN(t.probes));
-}
-
-async function loadProgress(): Promise<Set<number>> {
-    try {
-        const data = await readFile(PROGRESS_FILE, "utf8");
-        return new Set(JSON.parse(data) as number[]);
-    } catch {
-        return new Set();
-    }
-}
-
-async function saveProgress(fetchedIds: number[]) {
-    await writeFile(PROGRESS_FILE, JSON.stringify(fetchedIds));
-}
-
-async function loadExistingResults(): Promise<Record<number, TraceRouteResult>> {
-    try {
-        const data = await readFile(RESULTS_FILE, "utf8");
-        return JSON.parse(data) as Record<number, TraceRouteResult>;
-    } catch {
-        return {};
-    }
 }
 
 async function fetchWithTimeout(url: string, timeoutMs = 30000): Promise<Response | null> {
@@ -74,13 +66,13 @@ async function fetchWithTimeout(url: string, timeoutMs = 30000): Promise<Respons
     }
 }
 
-async function fetchTraceRouteResult(id: number): Promise<TraceRouteResult | null> {
+async function fetchPingResult(id: number): Promise<PingResult | null> {
     const res = await fetchWithTimeout(`https://atlas.ripe.net/api/v2/measurements/${id}/results`);
 
     if (!res || !res.ok) {
         return null;
     }
-
+    
     const text = await res.text();
     if (!text) {
         return null;
@@ -88,39 +80,77 @@ async function fetchTraceRouteResult(id: number): Promise<TraceRouteResult | nul
 
     const raw = JSON.parse(text) as Record<string, unknown>[];
 
-    return raw
-        .filter((r): r is Record<string, unknown> & { fw: number; prb_id: number; result: TraceRouteResult[0]["result"] } =>
+    const mapped = raw
+        .filter((r): r is Record<string, unknown> & { fw: number; prb_id: number; result: PingResult[0]["result"] } =>
             typeof r === "object" && r !== null && "fw" in r && r.fw !== 1
         )
         .map(r => ({
             fw: r.fw as number,
             prb_id: r.prb_id as number,
-            result: r.result as TraceRouteResult[0]["result"],
+            min: r.min as number,
+            avg: r.avg as number,
+            max: r.max as number,
+            result: r.result as PingResult[0]["result"],
         }));
+
+    
+    // clean so only one set of results per probe
+    const uniquePrbs: number[] = []
+    const cleanedResult: PingResult = []
+    mapped.forEach((result) => {
+        if (!uniquePrbs.includes(result.prb_id)) {
+            uniquePrbs.push(result.prb_id)
+            cleanedResult.push(result)
+        } 
+    })
+
+    return cleanedResult;
+}
+
+async function loadProgress(): Promise<Set<number>> {
+    try {
+        const data = await readFile(PROGRESS_FILE, "utf8");
+        return new Set(JSON.parse(data) as number[]);
+    } catch {
+        return new Set();
+    }
+}
+
+async function saveProgress(fetchedIds: number[]) {
+    await writeFile(PROGRESS_FILE, JSON.stringify(fetchedIds));
+}
+
+async function loadExistingResults(): Promise<Record<number, PingResult>> {
+    try {
+        const data = await readFile(RESULTS_FILE, "utf8");
+        return JSON.parse(data) as Record<number, PingResult>;
+    } catch {
+        return {};
+    }
 }
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function main() {
-    const traceroutes = await parseTraceroutes();
-    console.log(`Found ${traceroutes.length} traceroutes to fetch`);
+    const pings = await parseDomains();
+    console.log(`Found ${pings.length} pings to fetch`)
 
     const completed = await loadProgress();
     const results = await loadExistingResults();
-    const pending = traceroutes.filter(t => !completed.has(t.id));
+    const pending = pings.filter(t => !completed.has(t.id))
 
-    console.log(`Already fetched: ${completed.size}, remaining: ${pending.length}`);
+    console.log(`Already fetched: ${completed.size}, remaining: ${pending.length}`)
 
     let successCount = 0;
     let skipCount = 0;
 
     for (let i = 0; i < pending.length; i++) {
-        const { id, domain } = pending[i]!;
+        const {id, domain } = pending[i]!;
 
-        process.stdout.write(`[${completed.size + i + 1}/${traceroutes.length}] ${domain} (${id})... `);
+        process.stdout.write(`[${completed.size + i + 1}/${pings.length}] ${domain} (${id})... `);
 
-        const result = await fetchTraceRouteResult(id);
-
+        const result = await fetchPingResult(id)
+        
         if (result && result.length > 0 && result[0]!.fw !== 1) {
             results[id] = result;
             completed.add(id);
@@ -141,7 +171,6 @@ async function main() {
             await sleep(DELAY_MS);
         }
     }
-
     await saveProgress([...completed]);
     await writeFile(RESULTS_FILE, JSON.stringify(results, null, 2));
 

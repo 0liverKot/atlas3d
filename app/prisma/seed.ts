@@ -5,6 +5,9 @@ const RESULTS_FILE = "prisma/traceroute-results.json";
 const TRACEROUTES_FILE = "prisma/cleanedtraceroutes.txt";
 const BATCH_SIZE = 50;
 
+const PING_RESULTS_FILE = "prisma/ping-results.json"
+const PINGS_FILE = "prisma/domains.txt"
+
 type TraceRouteResult = {
     fw: number;
     prb_id: number;
@@ -17,17 +20,36 @@ type TraceRouteResult = {
     };
 }[];
 
-type TraceRouteMetadata = {
-    id: number;
-    domain: string;
-    probes: number;
+type TimeoutResult = {
+  type: "Timeout";
+  x: string;
 };
 
-type TraceRoute = {
+type ErrorResult = {
+  type: "Error";
+  error: string;
+};
+
+type ReplyResult = {
+  type: "Reply";
+  rtt: number;
+};
+
+type PingProbeResult = TimeoutResult | ErrorResult | ReplyResult
+
+type PingResult = {
+    fw: number;
+    prb_id: number;
+    min: number;
+    avg: number;
+    max: number;
+    result: PingProbeResult[]
+}[];
+
+type Metadata = {
     id: number;
     domain: string;
     probes: number;
-    results: TraceRouteResult;
 };
 
 type Probe = {
@@ -36,9 +58,9 @@ type Probe = {
     geometry: { coordinates: [number, number] };
 }
 
-async function loadMetadata(): Promise<Map<number, TraceRouteMetadata>> {
-    const data = await readFile(TRACEROUTES_FILE, "utf8");
-    const map = new Map<number, TraceRouteMetadata>();
+async function loadMetadata(): Promise<Map<number, Metadata>> {
+    const data = await readFile(PINGS_FILE, "utf8");
+    const map = new Map<number, Metadata>();
 
     for (const line of data.split("\n").filter(l => l.trim())) {
         const id = parseInt(line.split("|")[0]?.split(":")[1]?.trim() ?? "");
@@ -78,6 +100,8 @@ async function main() {
     const db = new PrismaClient();
 
     try {
+
+        // probe seeding
         /*
         const probes = await getAllProbes();
         const data = probes.
@@ -92,6 +116,8 @@ async function main() {
             console.log(`Seeding complete, ${count} probes added`)
         */
 
+        // traceroutes seeding
+        /*
         const metadata = await loadMetadata();
         const results = JSON.parse(await readFile(RESULTS_FILE, "utf8")) as Record<string, TraceRouteResult>;
 
@@ -118,6 +144,27 @@ async function main() {
         }
 
         console.log(`Seeding complete, ${totalSeeded} traceroutes added`);
+        */
+        
+
+        // ping seeding 
+        const metadata = await loadMetadata();
+        const results = JSON.parse(await readFile(PING_RESULTS_FILE, "utf8")) as Record<string, PingResult>;
+
+        const entries = Object.entries(results)
+        
+        const data = entries
+            .map(([idStr, result]) => {
+                const id = parseInt(idStr)
+                const meta = metadata.get(id)
+                if(!meta) return null
+                return {id, domain: meta.domain, probes: meta.probes, result: result}
+            }) 
+
+
+        const { count } = await db.ping.createMany({data, skipDuplicates: true})
+        console.log(`Seeding complete, ${count} pings added`);
+
     } finally {
         await db.$disconnect();
     }

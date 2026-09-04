@@ -24,4 +24,11 @@ model TraceRoute {
     results Json
 }
 
+model Ping {
+    id Int @id
+    domain String
+    probes Int
+    result Json
+}
+
 
