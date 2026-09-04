@@ -4,11 +4,19 @@ import AtlasGlobe from "./_components/AtlasGlobe";
 import Selections from "./_components/Measurements";
 import Details from "./_components/Details";
 import dynamic from "next/dynamic";
+import { useEffect } from "react";
+import { api } from "~/trpc/react";
 
 // dynamic import since Math.random causes hydration mismatches between server and client
 const Starfield = dynamic(() => import("./_components/Starfield"), { ssr: false});
 
 export default function Home() {
+
+    const ping = api.ping.getPing.useQuery(1004564)
+
+    useEffect(() => {
+        console.log(ping.data)
+    }, [ping])
 
     return(
     

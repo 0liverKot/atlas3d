@@ -4,6 +4,8 @@ import { findMissingProbes } from "./utils"
 import { ee } from "../api/root"
 import type { Probe } from "../api/schemas/db"
 import { getProbes } from "../api/probe"
+import type { Ping } from "../api/schemas/ping"
+import { fetchPing } from "../api/ping"
 
 interface DataStore {
 
@@ -11,6 +13,7 @@ interface DataStore {
         measurement: DnsResponse | null 
         probes: Map<number, Probe>
     }
+    pings: Map<number, Ping>
 }
 
 const store: DataStore = {
@@ -18,10 +21,20 @@ const store: DataStore = {
     popularDomains: {
         measurement: null,
         probes: new Map
-    }
+    },
+    pings:  new Map
+
 }
 
-export async function updateCache() {
+export async function getPing(id: number) {
+    // check datastore if ping has been cached 
+    const ping = store.pings.get(id)
+    if (ping) return ping;
+
+    return fetchPing(id);
+}
+
+export async function updatePopularDomains() {
 
     try { 
         const data = await getMeasurementOfPopularDomains()
@@ -43,7 +56,7 @@ export async function updateCache() {
 }
 
 async function poll() {
-    await updateCache()
+    await updatePopularDomains()
     setTimeout(() => { void poll() }, 1000)
 }
 

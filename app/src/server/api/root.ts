@@ -5,6 +5,7 @@ import type { DnsResponse } from "./schemas/dnsResponseSchema";
 import "../dataStore/dataStore"
 import { probeRouter } from "./routers/probe";
 import type { Probe } from "./schemas/db";
+import { pingRouter } from "./routers/ping";
 
 /**
  * This is the primary router for your server.
@@ -17,6 +18,7 @@ export const ee = new EventEmitter();
 export const appRouter = createTRPCRouter({
   atlas: atlasRouter,
   probe: probeRouter,
+  ping: pingRouter,
 
   onCacheUpdate: t.procedure.subscription(async function* (opts) {
     for await (const [data] of on(ee, 'update', {

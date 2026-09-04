@@ -17,6 +17,7 @@ export const pingResultSchema = z.object({
 })
 
 export const pingSchema = z.object({
+    id: z.number(),
     domain: z.string(),
     probes: z.number(),
     result: z.array(pingResultSchema)
