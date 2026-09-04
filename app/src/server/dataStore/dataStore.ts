@@ -4,7 +4,7 @@ import { findMissingProbes } from "./utils"
 import { ee } from "../api/root"
 import type { Probe } from "../api/schemas/db"
 import { getProbes } from "../api/probe"
-import type { Ping } from "../api/schemas/ping"
+import type { Ping } from "../api/schemas/db"
 import { fetchPing } from "../api/ping"
 
 interface DataStore {

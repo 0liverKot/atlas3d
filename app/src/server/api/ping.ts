@@ -1,5 +1,5 @@
 import { db } from "../db"
-import { pingSchema } from "./schemas/ping"
+import { pingSchema } from "./schemas/db"
 
 export async function fetchPing(pingId: number) {
     const ping = await db.ping.findFirst({
