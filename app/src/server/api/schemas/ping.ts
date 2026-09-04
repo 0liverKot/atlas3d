@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PingProbeResult = z.array(
+export const pingProbeResultSchema = z.array(
     z.union([   
         z.object({rtt: z.number()}),
         z.object({x: z.string()}),
@@ -8,16 +8,20 @@ export const PingProbeResult = z.array(
     ])
 )
 
-export const PingResult = z.object({
+export const pingResultSchema = z.object({
     avg: z.number(),
     max: z.number(),
     min: z.number(),
     prb_id: z.number(), 
-    result: PingProbeResult
+    result: pingProbeResultSchema
 })
 
-export const PingSchema = z.object({
+export const pingSchema = z.object({
     domain: z.string(),
     probes: z.number(),
-    result: z.array(PingResult)
+    result: z.array(pingResultSchema)
 })
+
+export type Ping = z.infer<typeof pingSchema>
+export type Pingresult = z.infer<typeof pingResultSchema>
+export type PingProbeResult = z.infer<typeof pingProbeResultSchema>
