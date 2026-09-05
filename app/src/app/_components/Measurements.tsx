@@ -1,7 +1,25 @@
 'use client'
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { api } from "~/trpc/react"
+
+const PAGESIZE = 10
+const MAX_VISIBLE_PAGINATION_TABS = 5
+
+const getVisiblePaginationTabs = (
+    tabs: { page: number; label: string }[],
+    currentPage: number,
+) => {
+    if (tabs.length <= MAX_VISIBLE_PAGINATION_TABS) return tabs
+
+    const halfWindow = Math.floor(MAX_VISIBLE_PAGINATION_TABS / 2)
+    const start = Math.min(
+        Math.max(currentPage - halfWindow, 0),
+        tabs.length - MAX_VISIBLE_PAGINATION_TABS,
+    )
+
+    return tabs.slice(start, start + MAX_VISIBLE_PAGINATION_TABS)
+}
 
 export default function Selections() {
 
@@ -10,22 +28,49 @@ export default function Selections() {
 
     const [traceroutePage, setTraceroutePage] = useState(0)
     const [pingPage, setPingPage] = useState(0)
+    const [traceroutePaginationTabs, setTraceroutePaginationTabs] = useState<{page: number; label: string}[]>()
+    const [pingPaginationTabs, setPingPaginationTabs] = useState<{page: number; label: string}[]>()
 
-    const tracerouteTabs = [
-        {page: 1, label: "1-10"},
-        {page: 2, label: "11-20"},
-        {page: 3, label: "21-20"},
-        {page: 4, label: "31-40"},
-        {page: 5, label: "41-50"},
-    ]
-    const pingTabs = [
-        {page: 1, label: "1-10"},
-        {page: 2, label: "11-20"},
-        {page: 3, label: "21-20"},
-        {page: 4, label: "31-40"},
-        {page: 5, label: "41-50"},
-    ]
+    useEffect(() => {
+        if (!tracerouteMetadata) return;
+        const traceroutePages = Math.ceil(tracerouteMetadata.length / PAGESIZE)
+        const traceroutePaginationTabs = Array.from({ length: traceroutePages }, (_, i) => ({
+            page: i,
+            label: `${i * PAGESIZE + 1}-${Math.min((i + 1) * PAGESIZE, tracerouteMetadata.length)}`,
+        }))
+        setTraceroutePaginationTabs(traceroutePaginationTabs)
+
+    }, [tracerouteMetadata])
     
+    useEffect(() => {
+        if (!pingMetadata) return;
+        const pingPages = Math.ceil(pingMetadata.length / PAGESIZE)
+        const pingPaginationTabs = Array.from({ length: pingPages }, (_, i) => ({
+            page: i,
+            label: `${i * PAGESIZE + 1}-${Math.min((i + 1) * PAGESIZE, pingMetadata.length)}`,
+        }))
+        setPingPaginationTabs(pingPaginationTabs)
+
+    }, [pingMetadata])
+
+    const visibleTracerouteTabs = traceroutePaginationTabs
+        ? getVisiblePaginationTabs(traceroutePaginationTabs, traceroutePage)
+        : []
+    const visibleTraceroutes = tracerouteMetadata?.slice(
+        traceroutePage * PAGESIZE,
+        (traceroutePage + 1) * PAGESIZE,
+    )
+    
+    const visiblePingTabs = pingPaginationTabs
+        ? getVisiblePaginationTabs(pingPaginationTabs, pingPage)
+        : []
+    const visiblePings = pingMetadata?.slice(
+        pingPage * PAGESIZE,
+        (pingPage + 1) * PAGESIZE,
+    )
+
+
+
     return (
         <div className="bg-primary primary-text basis-1/4 w-3/4 h-3/4 rounded-xl relative py-8 px-8 flex flex-col gap-5 overflow-hidden shadow-xl/30">
             <div className="header">Measurements</div>
@@ -39,7 +84,7 @@ export default function Selections() {
                 <div className="flex-1 overflow-y-auto min-h-0 scrollbar-none">
                 {!tracerouteMetadata && <div className="text-neutral-400">loading...</div>}
                 
-                {tracerouteMetadata?.map((data, i) => {
+                {visibleTraceroutes?.map((data, i) => {
                     return (
                         <div key={`tr-${data.id}`} className={`flex justify-between items-center py-2 ${i > 0 ? 'border-t border-white/5' : ''}`}>
                             <button className='text-sm truncate mr-2'>{data.domain}{data.probes}</button>
@@ -48,17 +93,17 @@ export default function Selections() {
                     )
                 })}
                 </div>
-                <div className="flex gap-2 mt-3 flex-wrap justify-center">
-                    {tracerouteTabs.map((tab) => (
-                        <button
-                            key={tab.page}
-                            onClick={() => setTraceroutePage(tab.page)}
-                            className={`tab ${traceroutePage === tab.page ? 'tab-active' : ''}`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
+                    <div className="flex gap-2 mt-3 flex-wrap justify-center">
+                        {visibleTracerouteTabs.map((tab) => (
+                            <button
+                                key={tab.page}
+                                onClick={() => setTraceroutePage(tab.page)}
+                                className={`tab ${traceroutePage === tab.page ? 'tab-active' : ''}`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
             </div>
 
             <div className="flex-1 flex flex-col min-h-0">
@@ -67,7 +112,7 @@ export default function Selections() {
                 <div className="flex-1 overflow-y-auto min-h-0 scrollbar-none">
                 {!pingMetadata && <div className="text-neutral-400">loading...</div>}
                 
-                {pingMetadata?.map((data, i) => {
+                {visiblePings?.map((data, i) => {
                     return (
                         <div key={`p-${data.id}`} className={`flex justify-between items-center py-2 ${i > 0 ? "border-t border-white/5" : ""}`}> 
                             <button className='text-sm  truncate mr-2'>{data.domain}{data.probes}</button>
@@ -78,7 +123,7 @@ export default function Selections() {
                 })}
                 </div>
                 <div className="flex gap-2 mt-3 flex-wrap justify-center">
-                    {pingTabs.map((tab) => (
+                    {visiblePingTabs?.map((tab) => (
                         <button
                             key={tab.page}
                             onClick={() => setPingPage(tab.page)}
