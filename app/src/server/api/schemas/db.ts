@@ -61,6 +61,12 @@ export const tracerouteSchema = z.object({
     results: z.array(tracerouteResultSchema)
 })
 
+export const metaData = z.object({
+    id: z.number(),
+    domain: z.string(),
+    probes:z.number()
+})
+
 export type Traceroute = z.infer<typeof tracerouteSchema>
 export type TracerouteResult = z.infer<typeof tracerouteResultSchema>
 export type TracerouteProbeResult = z.infer<typeof tracerouteProbeResultSchema>
@@ -70,3 +76,4 @@ export type Pingresult = z.infer<typeof pingResultSchema>
 export type PingProbeResult = z.infer<typeof pingProbeResultSchema>
 
 export type Probe = z.infer<typeof probeSchema>
+export type MetaData = z.infer<typeof metaData>
