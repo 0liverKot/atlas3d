@@ -23,6 +23,7 @@
     "fetch-traceroutes": "tsx prisma/fetch-traceroutes.ts",
     "validate-traceroutes": "tsx prisma/validate-traceroutes.ts",
     "delete-failed-traceroutes": "tsx prisma/delete-failed-traceroutes.ts",
+    "strip-www-from-traceroutes": "tsx prisma/strip-www-from-traceroutes.ts",
     "test-size": "tsx scripts/measure-cache-size.ts",
     "fetch-pings": "tsx prisma/fetch-pings.ts"
   },

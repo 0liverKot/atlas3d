@@ -1,15 +1,15 @@
 'use client'
 
 import { useState } from "react"
+import { api } from "~/trpc/react"
 
 export default function Selections() {
 
+    const pingMetadata = api.ping.getMetadata.useQuery().data
+    const tracerouteMetadata = api.traceroute.getMetadata.useQuery().data
 
     const [traceroutePage, setTraceroutePage] = useState(0)
     const [pingPage, setPingPage] = useState(0)
-
-    // temporary
-    const domains = ['google.com', 'amazon.com', 'twitter.com', 'website.com', 'generic.com', 'random.com', 'instagram.com', 'youtube.com']
 
     const tracerouteTabs = [
         {page: 1, label: "1-10"},
@@ -33,13 +33,18 @@ export default function Selections() {
 
             <button className="text-left text-sm">View measure of popular domains</button>
 
-            <div className="flex flex-col gap-2 min-h-0">
-                <div className="secondary-text">TraceRoutes</div>
+            <div className="flex-1 flex flex-col min-h-0">
+                <div className="secondary-text mb-2">TraceRoutes</div>
                 <div className="w-full h-px bg-white/10" />
-                <div className="flex flex-col overflow-y-auto scrollbar-none">
-                {domains.map((domain) => {
+                <div className="flex-1 overflow-y-auto min-h-0 scrollbar-none">
+                {!tracerouteMetadata && <div className="text-neutral-400">loading...</div>}
+                
+                {tracerouteMetadata?.map((data, i) => {
                     return (
-                        <button className='text-left text-sm py-2' key={`tr-${domain}`}>{domain}</button>
+                        <div key={`tr-${data.id}`} className={`flex justify-between items-center py-2 ${i > 0 ? 'border-t border-white/5' : ''}`}>
+                            <button className='text-sm truncate mr-2'>{data.domain}{data.probes}</button>
+                            <span className="flex text-sm font-medium">{`${data.probes} probes`}</span>
+                        </div>
                     )
                 })}
                 </div>
@@ -56,13 +61,19 @@ export default function Selections() {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-2 min-h-0">
-                <div className="secondary-text">Ping</div>
+            <div className="flex-1 flex flex-col min-h-0">
+                <div className="secondary-text mb-2">Ping</div>
                 <div className="w-full h-px bg-white/10" />
-                <div className="flex flex-col overflow-y-auto scrollbar-none">
-                {domains.map((domain) => {
+                <div className="flex-1 overflow-y-auto min-h-0 scrollbar-none">
+                {!pingMetadata && <div className="text-neutral-400">loading...</div>}
+                
+                {pingMetadata?.map((data, i) => {
                     return (
-                        <button className='text-left text-sm py-2' key={`tr-${domain}`}>{domain}</button>
+                        <div key={`p-${data.id}`} className={`flex justify-between items-center py-2 ${i > 0 ? "border-t border-white/5" : ""}`}> 
+                            <button className='text-sm  truncate mr-2'>{data.domain}{data.probes}</button>
+                            <span className="flex text-sm font-medium">{`${data.probes} probes`}</span>
+                        </div>
+
                     )
                 })}
                 </div>
