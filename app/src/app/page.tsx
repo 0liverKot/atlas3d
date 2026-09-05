@@ -12,11 +12,11 @@ const Starfield = dynamic(() => import("./_components/Starfield"), { ssr: false}
 
 export default function Home() {
 
-    const traceroute = api.traceroute.getTraceroute.useQuery(1012411)
+    const metadata = api.traceroute.getMetadata.useQuery()
 
     useEffect(() => {
-        console.log(traceroute.data)
-    }, [traceroute])
+        console.log(metadata.data)
+    }, [metadata])
 
     return(
     

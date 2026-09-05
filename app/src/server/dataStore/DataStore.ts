@@ -55,6 +55,7 @@ function formatBytes(value: number) {
 const serializedBytes = (value: unknown) => {
     const serialized = JSON.stringify(value, (_key, nestedValue: unknown) => {
         if (nestedValue instanceof Map) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return Object.fromEntries(nestedValue)
         }
 

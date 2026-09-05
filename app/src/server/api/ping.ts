@@ -1,5 +1,6 @@
+import z from "zod"
 import { db } from "../db"
-import { pingSchema } from "./schemas/db"
+import { pingSchema,metaDataSchema } from "./schemas/db"
 
 export async function fetchPing(pingId: number) {
     const ping = await db.ping.findFirst({
@@ -9,4 +10,19 @@ export async function fetchPing(pingId: number) {
     })
 
     return pingSchema.parse(ping)
+}
+
+export async function fetchAllPingMetaData() {
+    const metaData = await db.ping.findMany({
+        select: {
+            id: true,
+            domain: true,
+            probes: true
+        }
+    }).catch((e) => {
+        console.error("Prisma Error Getting Metadata For Ping Measurements", e)
+    })
+
+    return z.array(metaDataSchema).parse(metaData)
+
 }
