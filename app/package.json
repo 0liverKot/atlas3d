@@ -21,6 +21,8 @@
     "typecheck": "tsc --noEmit",
     "db:seed": "prisma db seed",
     "fetch-traceroutes": "tsx prisma/fetch-traceroutes.ts",
+    "validate-traceroutes": "tsx prisma/validate-traceroutes.ts",
+    "delete-failed-traceroutes": "tsx prisma/delete-failed-traceroutes.ts",
     "fetch-pings": "tsx prisma/fetch-pings.ts"
   },
   "dependencies": {

@@ -2,10 +2,10 @@ import type { DnsResponse } from "../api/schemas/dnsResponseSchema"
 import { getMeasurementOfPopularDomains } from "../api/atlas"
 import { findMissingProbes } from "./utils"
 import { ee } from "../api/root"
-import type { Probe } from "../api/schemas/db"
+import type { Probe, Ping, Traceroute } from "../api/schemas/db"
 import { getProbes } from "../api/probe"
-import type { Ping } from "../api/schemas/db"
 import { fetchPing } from "../api/ping"
+import { fetchTraceroute } from "../api/traceroute"
 
 interface DataStore {
 
@@ -14,6 +14,7 @@ interface DataStore {
         probes: Map<number, Probe>
     }
     pings: Map<number, Ping>
+    traceroutes: Map<number, Traceroute>
 }
 
 const store: DataStore = {
@@ -22,8 +23,8 @@ const store: DataStore = {
         measurement: null,
         probes: new Map
     },
-    pings:  new Map
-
+    pings:  new Map,
+    traceroutes: new Map
 }
 
 export async function getPing(id: number) {
@@ -32,6 +33,14 @@ export async function getPing(id: number) {
     if (ping) return ping;
 
     return fetchPing(id);
+}
+
+export async function getTraceroute(id: number) {
+    // check datastore if traceroute has been cached 
+    const traceroute = store.traceroutes.get(id)
+    if (traceroute) return traceroute
+
+    return fetchTraceroute(id)
 }
 
 export async function updatePopularDomains() {

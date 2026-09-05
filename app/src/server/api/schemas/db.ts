@@ -35,13 +35,18 @@ export const tracerouteProbeResultSchema = z.array(z.object({
     hop: z.number(),
     error: z.string().optional(),
     result: z.array(z.union([
-        z.object({z: z.string()}),
         z.object({
-            rtt: z.number(),
-            err: z.string().optional(),
-            from: z.string()     
+            x: z.string()
+        }),
+        z.object({
+            error: z.string()
+        }),
+        z.object({
+            from: z.string(),
+            rtt: z.number().optional(),
+            err: z.string().optional()
         })
-    ]))
+    ])).optional()
 }))
 
 export const tracerouteResultSchema = z.object({

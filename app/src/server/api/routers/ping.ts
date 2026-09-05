@@ -1,6 +1,6 @@
 import z from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { getPing } from "~/server/dataStore/dataStore";
+import { getPing } from "~/server/dataStore/DataStore";
 
 export const pingRouter = createTRPCRouter({
     getPing: publicProcedure

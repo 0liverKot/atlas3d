@@ -12,11 +12,11 @@ const Starfield = dynamic(() => import("./_components/Starfield"), { ssr: false}
 
 export default function Home() {
 
-    const ping = api.ping.getPing.useQuery(1004564)
+    const traceroute = api.traceroute.getTraceroute.useQuery(1012411)
 
     useEffect(() => {
-        console.log(ping.data)
-    }, [ping])
+        console.log(traceroute.data)
+    }, [traceroute])
 
     return(
     
