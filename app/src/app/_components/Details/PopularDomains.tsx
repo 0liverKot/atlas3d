@@ -1,7 +1,7 @@
 'use client'
 
 import type { DnsResponse, DnsResponseResultSet } from "~/server/api/schemas/dnsResponseSchema"
-import { useLiveData } from "../hooks/useLiveData"
+import { useLiveData } from "../../hooks/useLiveData"
 import { useEffect, useRef, useState } from "react"
 import type { Probe } from "~/server/api/schemas/db"
 import dnsPacket from "dns-packet"
@@ -67,7 +67,7 @@ const formatRtt = (rtt: number) => {
     return `${(rtt / 1000).toFixed(1)}s`
 }
 
-export default function Details() {
+export default function PopularDomainsDetails() {
 
     const [probesDisplayed, setProbesDisplayed] = useState(0)
     const [minRTT, setMinRTT] = useState(0)

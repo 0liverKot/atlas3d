@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { api } from "~/trpc/react"
+import type { DetailSelection } from "../utils/DetailSelection"
 
 const PAGESIZE = 10
 const MAX_VISIBLE_PAGINATION_TABS = 5
@@ -21,7 +22,11 @@ const getVisiblePaginationTabs = (
     return tabs.slice(start, start + MAX_VISIBLE_PAGINATION_TABS)
 }
 
-export default function Selections() {
+type SelectionsProps = {
+    onSelect: (selection: DetailSelection) => void
+}
+
+export default function Selections({ onSelect } : SelectionsProps) {
 
     const pingMetadata = api.ping.getMetadata.useQuery().data
     const tracerouteMetadata = api.traceroute.getMetadata.useQuery().data
@@ -76,7 +81,12 @@ export default function Selections() {
             <div className="header">Measurements</div>
             <div className="w-full h-px bg-white/10" />
 
-            <button className="text-left text-sm">View measure of popular domains</button>
+            <button 
+                className="text-left text-sm"
+                onClick={() => onSelect({type: "popular-domains"})}
+            >
+                    View measure of popular domains
+            </button>
 
             <div className="flex-1 flex flex-col min-h-0">
                 <div className="secondary-text mb-2">TraceRoutes</div>
@@ -87,7 +97,12 @@ export default function Selections() {
                 {visibleTraceroutes?.map((data, i) => {
                     return (
                         <div key={`tr-${data.id}`} className={`flex justify-between items-center py-2 ${i > 0 ? 'border-t border-white/5' : ''}`}>
-                            <button className='text-sm truncate mr-2'>{data.domain}{data.probes}</button>
+                            <button 
+                                className='text-sm truncate mr-2'
+                                onClick={() => onSelect({type: "traceroute", id: data.id})}
+                            >
+                                {data.domain}{data.probes}
+                            </button>
                             <span className="flex text-sm font-medium">{`${data.probes} probes`}</span>
                         </div>
                     )
@@ -115,7 +130,12 @@ export default function Selections() {
                 {visiblePings?.map((data, i) => {
                     return (
                         <div key={`p-${data.id}`} className={`flex justify-between items-center py-2 ${i > 0 ? "border-t border-white/5" : ""}`}> 
-                            <button className='text-sm  truncate mr-2'>{data.domain}{data.probes}</button>
+                            <button 
+                                className='text-sm  truncate mr-2'
+                                onClick={() => onSelect({type: 'ping', id: data.id})}
+                            >
+                                {data.domain}{data.probes}
+                            </button>
                             <span className="flex text-sm font-medium">{`${data.probes} probes`}</span>
                         </div>
 
