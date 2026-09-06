@@ -20,7 +20,7 @@ export default function Home() {
             <NotificationListener/>
             <Selections onSelect={setSelection}/>
             <div className="basis-1/2 mx-auto w-full relative overflow-hidden h-full z-10">
-                <AtlasGlobe/>
+                <AtlasGlobe selection={selection}/>
             </div>
             <Details selection={selection}/>
         </div>

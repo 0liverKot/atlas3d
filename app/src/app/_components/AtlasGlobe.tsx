@@ -2,12 +2,17 @@
 import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import type{  GlobeConfig } from '../utils/globeTypes'
 import React from "react";
+import type { DetailSelection } from "../utils/DetailSelection";
 
 const World = React.lazy(() => 
     import("./Globe").then((m) => ({default: m.World}))
 ) 
 
-const AtlasGlobe = memo(function AtlasGlobe({}) {
+type AtlasGlobeProps = {
+    selection: DetailSelection
+}
+
+const AtlasGlobe = memo(function AtlasGlobe({selection}: AtlasGlobeProps) {
     
     const globeConfig = useMemo<GlobeConfig>(() => ({
         pointSize: 4,
@@ -39,7 +44,7 @@ const AtlasGlobe = memo(function AtlasGlobe({}) {
 
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            <World globeConfig={globeConfig}/>
+            <World globeConfig={globeConfig} selection={selection}/>
         </Suspense>
     )
 })
