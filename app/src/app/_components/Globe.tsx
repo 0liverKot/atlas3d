@@ -72,22 +72,25 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
     const data: Position[] = useMemo(() => [], []);
 
     const pingId = selection.type === "ping" ? selection.id : 0;
-    const pingData = api.ping.getPing.useQuery(pingId, {
+    const pingQuery = api.ping.getPing.useQuery(pingId, {
         enabled: selection.type === "ping",
-    }).data;
+    });
     
     const tracerouteId = selection.type === "traceroute" ? selection.id : 0;
-    const tracerouteData = api.traceroute.getTraceroute.useQuery(tracerouteId, {
+    const tracerouteQuery = api.traceroute.getTraceroute.useQuery(tracerouteId, {
         enabled: selection.type === "traceroute",
-    }).data;
+    });
 
     // update globe with ping data
     useEffect(() => {
         if (!globeRef.current || !isInitialized) return;
         if (selection.type !== "ping") return;
 
-        console.log("ping selected", selection.id);
-    }, [isInitialized, selection]);
+        if(!pingQuery.data) return; 
+
+        const data = pingQuery.data
+        console.log(data)
+    }, [isInitialized, selection, pingQuery.data]);
 
     // update globe with traceroute data
     useEffect(() => {
