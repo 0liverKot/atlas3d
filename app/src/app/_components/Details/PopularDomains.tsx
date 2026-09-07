@@ -5,6 +5,7 @@ import { useLiveData } from "../../hooks/useLiveData"
 import { useEffect, useRef, useState } from "react"
 import type { Probe } from "~/server/api/schemas/db"
 import dnsPacket from "dns-packet"
+import { formatRtt } from "./utils"
 
 const PAGESIZE = 10
 
@@ -58,13 +59,6 @@ const mostObserved = (page: number, pageSize: number, data: DnsResponse) => {
     const start = 0 + (page * pageSize)
     const end = start + pageSize
     return { domains: sortedDomainNames.slice(start, end), total }
-}
-
-
-const formatRtt = (rtt: number) => {
-    if (rtt < 1) return `${(rtt * 1000).toFixed(0)}μs`
-    if (rtt < 1000) return `${rtt.toFixed(0)}ms`
-    return `${(rtt / 1000).toFixed(1)}s`
 }
 
 export default function PopularDomainsDetails() {
