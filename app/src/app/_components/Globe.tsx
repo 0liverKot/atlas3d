@@ -25,7 +25,7 @@ import { OrbitControls } from "@react-three/drei";
 import countries from "public/data/globedata.json";
 import type { Position, GlobeConfig } from "../utils/globeTypes";
 import { liveData } from "../utils/liveData";
-import { transformToPoints } from "../utils/globeFuncs";
+import { transformPopularDomainsToPoints, transformPingToPoints } from "../utils/globeFuncs";
 import type { DetailSelection } from "../utils/DetailSelection";
 import { api } from "~/trpc/react";
 declare module "@react-three/fiber" {
@@ -89,7 +89,9 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
         if(!pingQuery.data) return; 
 
         const data = pingQuery.data
-        console.log(data)
+        const points = transformPingToPoints(data);
+        globeRef.current?.pointsData(points);
+        
     }, [isInitialized, selection, pingQuery.data]);
 
     // update globe with traceroute data
@@ -100,7 +102,7 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
         if(!tracerouteQuery.data) return;
 
         const data = tracerouteQuery.data
-        console.log(data)
+        
         
         console.log("traceroute selected", selection.id);
     }, [isInitialized, selection, tracerouteQuery.data]);
@@ -119,7 +121,7 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
             const data = liveData.getSnapshot();
             if (!data) return;
 
-            const points = transformToPoints(data);
+            const points = transformPopularDomainsToPoints(data);
             globeRef.current?.pointsData(points);
         };
 
