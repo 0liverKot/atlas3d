@@ -72,12 +72,12 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
     const data: Position[] = useMemo(() => [], []);
 
     const pingId = selection.type === "ping" ? selection.id : 0;
-    const pingQuery = api.ping.getPing.useQuery(pingId, {
+    const pingQuery = api.ping.getPingAndProbes.useQuery(pingId, {
         enabled: selection.type === "ping",
     });
     
     const tracerouteId = selection.type === "traceroute" ? selection.id : 0;
-    const tracerouteQuery = api.traceroute.getTraceroute.useQuery(tracerouteId, {
+    const tracerouteQuery = api.traceroute.getTracerouteAndProbes.useQuery(tracerouteId, {
         enabled: selection.type === "traceroute",
     });
 
@@ -97,6 +97,11 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
         if (!globeRef.current || !isInitialized) return;
         if (selection.type !== "traceroute") return;
 
+        if(!tracerouteQuery.data) return;
+
+        const data = tracerouteQuery.data
+        console.log(data)
+        
         console.log("traceroute selected", selection.id);
     }, [isInitialized, selection]);
 

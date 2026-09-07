@@ -15,6 +15,7 @@ export class Queue<T> {
         if (index === -1) return;
         
         this.data = this.data.filter((_item, ind) => ind !==index)
+        this.data.push(item)
     }
 
     clear(): void {
