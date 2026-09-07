@@ -26,7 +26,6 @@ import { liveData } from "../utils/liveData";
 import { transformToPoints } from "../utils/globeFuncs";
 import type { DetailSelection } from "../utils/DetailSelection";
 import { api } from "~/trpc/react";
-import { readRouteCacheEntry } from "next/dist/client/components/segment-cache/cache";
 declare module "@react-three/fiber" {
     interface ThreeElements {
         threeGlobe: ThreeElements["mesh"] & (new () => ThreeGlobe);
@@ -103,12 +102,17 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
         console.log(data)
         
         console.log("traceroute selected", selection.id);
-    }, [isInitialized, selection]);
+    }, [isInitialized, selection, tracerouteQuery.data]);
 
-    // subscrube globe to live data if popular domains is selectted
+    // subscribe globe to live data if popular domains is selectted
     useEffect(() => {
         if (!globeRef.current || !isInitialized) return;
-        if (selection.type !== "popular-domains") return;
+        if (selection.type !== "popular-domains") {
+            globeRef.current.pointsData([]);
+            globeRef.current.ringsData([]);
+            globeRef.current.arcsData([]);
+            return;
+        }
 
         const updateGlobe = () => {
             const data = liveData.getSnapshot();
