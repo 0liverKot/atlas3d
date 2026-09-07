@@ -37,7 +37,6 @@ declare module "@react-three/fiber" {
 extend({ ThreeGlobe: ThreeGlobe });
 
 const RING_PROPAGATION_SPEED = 3;
-const aspect = 1.2;
 const cameraZ = 300;
 
 let numbersOfRings = [0];
@@ -295,6 +294,19 @@ export function WebGLRendererConfig() {
     return null;
 }
 
+function CameraConfig() {
+    const { camera, size } = useThree();
+
+    useEffect(() => {
+        if (!(camera instanceof PerspectiveCamera) || size.height === 0) return;
+
+        camera.aspect = size.width / size.height;
+        camera.updateProjectionMatrix();
+    }, [camera, size.width, size.height]);
+
+    return null;
+}
+
 function CameraRelativeLights({ globeConfig }: { globeConfig: GlobeConfig }) {
     const { camera } = useThree();
     const leftLightRef = useRef<DirectionalLight>(null);
@@ -350,15 +362,23 @@ export const World = memo(function World({
     globeConfig,
     selection,
 }: GlobeProps) {
-    const scene = new Scene();
+    const scene = useMemo(() => {
+        const nextScene = new Scene();
+        nextScene.fog = new Fog(0xffffff, 400, 2000);
+        return nextScene;
+    }, []);
+    const camera = useMemo(
+        () => new PerspectiveCamera(50, 1, 180, 1800),
+        [],
+    );
 
-    scene.fog = new Fog(0xffffff, 400, 2000);
     return (
         <Canvas
             scene={scene}
-            camera={new PerspectiveCamera(50, aspect, 180, 1800)}
+            camera={camera}
         >
             <WebGLRendererConfig />
+            <CameraConfig />
             <ambientLight color={globeConfig.ambientLight} intensity={0.1} />
             <CameraRelativeLights globeConfig={globeConfig} />
             <Globe globeConfig={globeConfig} selection={selection} />
