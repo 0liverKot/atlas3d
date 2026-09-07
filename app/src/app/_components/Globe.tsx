@@ -16,9 +16,11 @@ import {
     Raycaster,
     Sphere,
     Vector2,
+    DirectionalLight,
+    PointLight,
 } from "three";
 import ThreeGlobe from "three-globe";
-import { useThree, Canvas, extend } from "@react-three/fiber";
+import { useThree, Canvas, extend, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import countries from "public/data/globedata.json";
 import type { Position, GlobeConfig } from "../utils/globeTypes";
@@ -293,6 +295,57 @@ export function WebGLRendererConfig() {
     return null;
 }
 
+function CameraRelativeLights({ globeConfig }: { globeConfig: GlobeConfig }) {
+    const { camera } = useThree();
+    const leftLightRef = useRef<DirectionalLight>(null);
+    const topLightRef = useRef<DirectionalLight>(null);
+    const pointLightRef = useRef<PointLight>(null);
+    const leftLightPosition = useMemo(() => new Vector3(), []);
+    const topLightPosition = useMemo(() => new Vector3(), []);
+    const pointLightPosition = useMemo(() => new Vector3(), []);
+
+    useFrame(() => {
+        leftLightPosition.set(-220, 180, 260);
+        topLightPosition.set(-140, 260, 220);
+        pointLightPosition.set(-180, 140, 240);
+        camera.localToWorld(leftLightPosition);
+        camera.localToWorld(topLightPosition);
+        camera.localToWorld(pointLightPosition);
+
+        if (leftLightRef.current) {
+            leftLightRef.current.position.copy(leftLightPosition);
+            leftLightRef.current.target.position.set(0, 0, 0);
+            leftLightRef.current.target.updateMatrixWorld();
+        }
+
+        if (topLightRef.current) {
+            topLightRef.current.position.copy(topLightPosition);
+            topLightRef.current.target.position.set(0, 0, 0);
+            topLightRef.current.target.updateMatrixWorld();
+        }
+
+        pointLightRef.current?.position.copy(pointLightPosition);
+    });
+
+    return (
+        <>
+            <directionalLight
+                ref={leftLightRef}
+                color={globeConfig.directionalLeftLight}
+            />
+            <directionalLight
+                ref={topLightRef}
+                color={globeConfig.directionalTopLight}
+            />
+            <pointLight
+                ref={pointLightRef}
+                color={globeConfig.pointLight}
+                intensity={0.8}
+            />
+        </>
+    );
+}
+
 export const World = memo(function World({
     globeConfig,
     selection,
@@ -306,20 +359,8 @@ export const World = memo(function World({
             camera={new PerspectiveCamera(50, aspect, 180, 1800)}
         >
             <WebGLRendererConfig />
-            <ambientLight color={globeConfig.ambientLight} intensity={0.6} />
-            <directionalLight
-                color={globeConfig.directionalLeftLight}
-                position={new Vector3(-400, 100, 400)}
-            />
-            <directionalLight
-                color={globeConfig.directionalTopLight}
-                position={new Vector3(-200, 500, 200)}
-            />
-            <pointLight
-                color={globeConfig.pointLight}
-                position={new Vector3(-200, 500, 200)}
-                intensity={0.8}
-            />
+            <ambientLight color={globeConfig.ambientLight} intensity={0.1} />
+            <CameraRelativeLights globeConfig={globeConfig} />
             <Globe globeConfig={globeConfig} selection={selection} />
             <OrbitControls
                 enablePan={false}
