@@ -169,79 +169,74 @@ export default function PopularDomainsDetails() {
     }
     
     return (
-        <div className="bg-primary primary-text basis-1/4 w-3/5 h-3/4 rounded-xl relative py-8 px-8 flex flex-col gap-5 overflow-hidden shadow-xl/30">
-
+        <>
             {!data && <div className="text-neutral-400">loading...</div>}
             {data &&
             <>
-                <div className="header">Popular domains</div>
-                <div className="w-full h-px bg-white/10" />
+            <div className="p-3 flex flex-col items-center">
+                <span className="text-2xl font-semibold">{probesDisplayed}</span>
+                <span className="stat-label mt-1">Probes Online</span>
+                <span className="text-xs mt-1">{renderDelta(probeDeltaLiteral, true)}</span>
+            </div>
 
+            <div>
+                <div className="secondary-text mb-2">Response Time</div>
+                <div className="grid grid-cols-3 gap-3">
                     <div className="p-3 flex flex-col items-center">
-                        <span className="text-2xl font-semibold">{probesDisplayed}</span>
-                        <span className="stat-label mt-1">Probes Online</span>
-                        <span className="text-xs mt-1">{renderDelta(probeDeltaLiteral, true)}</span>
+                        <span className="stat-label">Min</span>
+                        <span className="text-lg font-medium mt-1">{formatRtt(minRTT)}</span>
+                        <span className="text-xs mt-1">{renderDelta(rttDeltas.min)}</span>
                     </div>
-
-                <div>
-                    <div className="secondary-text mb-2">Response Time</div>
-                    <div className="grid grid-cols-3 gap-3">
-                        <div className="p-3 flex flex-col items-center">
-                            <span className="stat-label">Min</span>
-                            <span className="text-lg font-medium mt-1">{formatRtt(minRTT)}</span>
-                            <span className="text-xs mt-1">{renderDelta(rttDeltas.min)}</span>
-                        </div>
-                        <div className="p-3 flex flex-col items-center">
-                            <span className="stat-label">Mean</span>
-                            <span className="text-lg font-medium mt-1">{formatRtt(meanRTT)}</span>
-                            <span className="text-xs mt-1">{renderDelta(rttDeltas.mean)}</span>
-                        </div>
-                        <div className="p-3 flex flex-col items-center">
-                            <span className="stat-label">Max</span>
-                            <span className="text-lg font-medium mt-1">{formatRtt(maxRTT)}</span>
-                            <span className="text-xs mt-1">{renderDelta(rttDeltas.max)}</span>
-                        </div>
+                    <div className="p-3 flex flex-col items-center">
+                        <span className="stat-label">Mean</span>
+                        <span className="text-lg font-medium mt-1">{formatRtt(meanRTT)}</span>
+                        <span className="text-xs mt-1">{renderDelta(rttDeltas.mean)}</span>
+                    </div>
+                    <div className="p-3 flex flex-col items-center">
+                        <span className="stat-label">Max</span>
+                        <span className="text-lg font-medium mt-1">{formatRtt(maxRTT)}</span>
+                        <span className="text-xs mt-1">{renderDelta(rttDeltas.max)}</span>
                     </div>
                 </div>
+            </div>
 
-                <div className="flex-1 flex flex-col min-h-0">
-                    <div className="secondary-text mb-2">Most Observed Domains</div>
-                    <div className="flex-1 overflow-y-auto min-h-0 scrollbar-none">
-                        <div className="flex flex-col">
-                            {mostObservedDomains.map(([domain, count], i) => {
-                                const change = domainChanges.get(domain)
-                                return (
-                                    <div key={domain} className={`flex justify-between items-center py-2 ${i > 0 ? 'border-t border-white/5' : ''}`}>
-                                        <span className="text-sm truncate mr-2">{domain}</span>
-                                        <div className="flex text-xs items-center gap-3 w-max">
-                                            <span className="text-sm font-medium">{count}</span>
-                                            {change !== undefined && renderDelta(change)}
-                                        </div>
+            <div className="flex-1 flex flex-col min-h-0">
+                <div className="secondary-text mb-2">Most Observed Domains</div>
+                <div className="flex-1 overflow-y-auto min-h-0 scrollbar-none">
+                    <div className="flex flex-col">
+                        {mostObservedDomains.map(([domain, count], i) => {
+                            const change = domainChanges.get(domain)
+                            return (
+                                <div key={domain} className={`flex justify-between items-center py-2 ${i > 0 ? 'border-t border-white/5' : ''}`}>
+                                    <span className="text-sm truncate mr-2">{domain}</span>
+                                    <div className="flex text-xs items-center gap-3 w-max">
+                                        <span className="text-sm font-medium">{count}</span>
+                                        {change !== undefined && renderDelta(change)}
                                     </div>
-                                )
-                            })}
-                            {mostObservedDomains.length === 0 && (
-                                <div className="text-sm text-neutral-500 py-2">No domains observed</div>
-                            )}
-                        </div>
-                    </div>
-
-                    {totalPages > 1 &&
-                    <div className="flex gap-2 mt-3 flex-wrap justify-center">
-                        {paginationTabs.map((tab) => (
-                            <button
-                                key={tab.page}
-                                onClick={() => setCurrentPage(tab.page)}
-                                className={`tab ${currentPage === tab.page ? 'tab-active' : ''}`}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-                    }
+                                </div>
+                            )
+                        })}
+                        {mostObservedDomains.length === 0 && (
+                            <div className="text-sm text-neutral-500 py-2">No domains observed</div>
+                        )}
                 </div>
-            </>
+            </div>
+
+            {totalPages > 1 &&
+            <div className="flex gap-2 mt-3 flex-wrap justify-center">
+                {paginationTabs.map((tab) => (
+                    <button
+                        key={tab.page}
+                        onClick={() => setCurrentPage(tab.page)}
+                        className={`tab ${currentPage === tab.page ? 'tab-active' : ''}`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
             }
-        </div>
-    )
+            </div>    
+            </>}
+        </>
+    )   
 }
