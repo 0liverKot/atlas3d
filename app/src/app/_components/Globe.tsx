@@ -25,7 +25,7 @@ import { OrbitControls } from "@react-three/drei";
 import countries from "public/data/globedata.json";
 import type { Position, GlobeConfig } from "../utils/globeTypes";
 import { liveData } from "../utils/liveData";
-import { transformPopularDomainsToPoints, transformPingToPoints } from "../utils/globeFuncs";
+import { transformPopularDomainsToPoints, transformPingToPoints, transformTracerouteToPoints, transformPathsToArcs } from "../utils/globeFuncs";
 import type { DetailSelection } from "../utils/DetailSelection";
 import { api } from "~/trpc/react";
 declare module "@react-three/fiber" {
@@ -61,7 +61,7 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
         emissive: "#000000",
         emissiveIntensity: 0.1,
         shininess: 0.9,
-        arcTime: 2000,
+        arcTime: 20000,
         arcLength: 0.9,
         rings: 1,
         maxRings: 3,
@@ -102,9 +102,15 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
         if(!tracerouteQuery.data) return;
 
         const data = tracerouteQuery.data
+        const paths = transformTracerouteToPoints(data);
+        const arcs = transformPathsToArcs(paths);
+
+        const points = paths.flat()
+        globeRef.current?.pointsData(points);
+        globeRef.current?.arcsData(arcs)
         
-        
-        console.log("traceroute selected", selection.id);
+
+
     }, [isInitialized, selection, tracerouteQuery.data]);
 
     // subscribe globe to live data if popular domains is selectted
@@ -219,7 +225,7 @@ export function Globe({ globeConfig, selection }: GlobeProps) {
             .arcStroke(() => [0.32, 0.28, 0.3][Math.round(Math.random() * 2)]!)
             .arcDashLength(defaultProps.arcLength)
             .arcDashInitialGap((e) => (e as { order: number }).order * 1)
-            .arcDashGap(15)
+            .arcDashGap(10)
             .arcDashAnimateTime(() => defaultProps.arcTime);
 
         globeRef.current

@@ -1,6 +1,7 @@
-import { type Ping, type Probe } from "~/server/api/schemas/db";
-import type { GlobePoint } from "./globeTypes";
+import { type Ping, type Probe, type Traceroute } from "~/server/api/schemas/db";
+import type { GlobePoint, Position } from "./globeTypes";
 import type { PopularDomains } from "./liveData";
+import { color } from "three/src/nodes/tsl/TSLCore.js";
 
 function getColor(rtt: number): string {
     
@@ -70,4 +71,80 @@ export function transformPingToPoints(data: {ping: Ping; probes: Probe[]}): Glob
     })
 
     return globePoints
+}
+
+export function transformTracerouteToPoints(data: {traceroute: Traceroute; probes: Probe[]}) {
+    const traceroute = data.traceroute
+    const probes = data.probes
+    const paths: GlobePoint[][] = []
+
+
+    traceroute.results.forEach((probeData) => {
+        const probe = probes.find((probe) => probeData.prb_id === probe.id)
+        if (!probe) return
+        const globePoints: GlobePoint[] = []
+
+        probeData.result.forEach((hop) => {
+            if (!hop.result) return
+
+            const validResults = (hop.result ?? []).filter(
+            (
+                hopResult,
+            ): hopResult is Extract<
+                NonNullable<typeof hop.result>[number],
+                { from: unknown }
+            > =>
+                "from" in hopResult &&
+                typeof hopResult.rtt === "number",
+            );
+            // only need to look at first since all valid results will be the same location
+            const validResult = validResults.at(0)
+            if (!validResult) return; 
+
+            const color = validResult.rtt ? getColor(validResult.rtt) : '#ffffff'
+            const latitude = validResult.from.latitude
+            const longitude = validResult.from.longitude
+            if(!(latitude && longitude)) return
+            
+            // check if this is in the same approx location
+            const previousGlobePoint = globePoints.at(-1)
+            if (previousGlobePoint?.lat === latitude && previousGlobePoint?.lng === longitude) return;  
+
+            const globePoint: GlobePoint = {
+                lat: latitude,
+                lng: longitude,
+                color: color,
+                size: 0.5
+            }
+            globePoints.push(globePoint) 
+        })
+        paths.push(globePoints)
+    })
+    return paths;
+}
+
+export function transformPathsToArcs(paths: GlobePoint[][]): Position[] {
+    const arcs: Position[] = []
+
+    paths.forEach((path) => {
+        let previousPoint: GlobePoint | undefined
+        
+        path.forEach((point, index) => {
+            if (previousPoint) {
+                arcs.push({
+                    order: index,
+                    startLat: previousPoint.lat,
+                    startLng: previousPoint.lng,
+                    endLat: point.lat,
+                    endLng: point.lng,
+                    arcAlt: 0.15,
+                    color: point.color
+
+                })
+            }
+            previousPoint = point
+        })
+    })
+
+    return arcs
 }

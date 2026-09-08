@@ -84,7 +84,7 @@ export default function TracerouteDetails({ id }: TracerouteProps) {
                 )}
                 {hops.map((hop, index) => (
                   <div key={`${hop.hop}-${index}`}>
-                    <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                    <div className="rounded-lg border border-white/10 bg-white/5  p-3">
                       <div className="mb-2 flex items-center justify-between">
                         <span className="stat-label">Jump {hop.hop}</span>
                         {hop.error && (
