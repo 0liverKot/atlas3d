@@ -3,24 +3,10 @@
 import { useEffect, useState } from "react"
 import { api } from "~/trpc/react"
 import type { DetailSelection } from "../utils/DetailSelection"
+import { getVisiblePaginationTabs } from "../utils/utils"
 
 const PAGESIZE = 10
 const MAX_VISIBLE_PAGINATION_TABS = 5
-
-const getVisiblePaginationTabs = (
-    tabs: { page: number; label: string }[],
-    currentPage: number,
-) => {
-    if (tabs.length <= MAX_VISIBLE_PAGINATION_TABS) return tabs
-
-    const halfWindow = Math.floor(MAX_VISIBLE_PAGINATION_TABS / 2)
-    const start = Math.min(
-        Math.max(currentPage - halfWindow, 0),
-        tabs.length - MAX_VISIBLE_PAGINATION_TABS,
-    )
-
-    return tabs.slice(start, start + MAX_VISIBLE_PAGINATION_TABS)
-}
 
 type SelectionsProps = {
     onSelect: (selection: DetailSelection) => void
@@ -59,7 +45,7 @@ export default function Selections({ onSelect } : SelectionsProps) {
     }, [pingMetadata])
 
     const visibleTracerouteTabs = traceroutePaginationTabs
-        ? getVisiblePaginationTabs(traceroutePaginationTabs, traceroutePage)
+        ? getVisiblePaginationTabs(traceroutePaginationTabs, traceroutePage, MAX_VISIBLE_PAGINATION_TABS)
         : []
     const visibleTraceroutes = tracerouteMetadata?.slice(
         traceroutePage * PAGESIZE,
@@ -67,7 +53,7 @@ export default function Selections({ onSelect } : SelectionsProps) {
     )
     
     const visiblePingTabs = pingPaginationTabs
-        ? getVisiblePaginationTabs(pingPaginationTabs, pingPage)
+        ? getVisiblePaginationTabs(pingPaginationTabs, pingPage, MAX_VISIBLE_PAGINATION_TABS)
         : []
     const visiblePings = pingMetadata?.slice(
         pingPage * PAGESIZE,

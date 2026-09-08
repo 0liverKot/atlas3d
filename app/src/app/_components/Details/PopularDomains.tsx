@@ -5,7 +5,7 @@ import { useLiveData } from "../../hooks/useLiveData"
 import { useEffect, useRef, useState } from "react"
 import type { Probe } from "~/server/api/schemas/db"
 import dnsPacket from "dns-packet"
-import { formatRtt } from "./utils"
+import { formatRtt } from "~/app/utils/utils"
 
 const PAGESIZE = 10
 

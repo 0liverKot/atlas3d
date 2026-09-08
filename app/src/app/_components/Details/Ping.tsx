@@ -1,23 +1,8 @@
 import { useEffect, useState } from "react"
 import { api } from "~/trpc/react"
-import { formatRtt } from "./utils"
+import { formatRtt, getVisiblePaginationTabs } from "~/app/utils/utils"
 
 const MAX_VISIBLE_PAGINATION_TABS = 9
-
-const getVisiblePaginationTabs = (
-    tabs: { page: number; label: string }[],
-    currentTab: number,
-) => {
-    if (tabs.length <= MAX_VISIBLE_PAGINATION_TABS) return tabs
-
-    const halfWindow = Math.floor(MAX_VISIBLE_PAGINATION_TABS / 2)
-    const start = Math.min(
-        Math.max(currentTab - halfWindow, 0),
-        tabs.length - MAX_VISIBLE_PAGINATION_TABS,
-    )
-
-    return tabs.slice(start, start + MAX_VISIBLE_PAGINATION_TABS)
-}
 
 type PingDetailsProps = {
     id: number
@@ -54,14 +39,14 @@ export default function PingDetails({ id }: PingDetailsProps) {
 
         const paginationTabs = Array.from({ length: data.probes.length }, (_, i) => ({
             page: i,
-            label: i.toString()
+            label: (i + 1).toString()
         }))
         setPaginationTabs(paginationTabs)
 
     }, [data])
 
     const visibleTabs = paginationTabs
-        ? getVisiblePaginationTabs(paginationTabs, currentTab)
+        ? getVisiblePaginationTabs(paginationTabs, currentTab, MAX_VISIBLE_PAGINATION_TABS)
         : []
     const selectedProbe = data?.probes[currentTab]
     const selectedResult = selectedProbe

@@ -42,7 +42,13 @@ export const tracerouteProbeResultSchema = z.array(z.object({
             error: z.string()
         }),
         z.object({
-            from: z.string(),
+            from: z.object({
+                ip: z.string(),
+                latitude: z.number().nullable(),
+                longitude: z.number().nullable(),
+                city: z.string().nullable(),
+                countryCode: z.string().nullable(),
+            }),
             rtt: z.number().optional(),
             err: z.string().optional()
         })

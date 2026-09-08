@@ -24,11 +24,19 @@ model TraceRoute {
     results Json
 }
 
+model IpLocation {
+    ip          String   @id
+    latitude    Float?
+    longitude   Float?
+    city        String?
+    countryCode String?
+    resolved    Boolean  @default(false)
+    updatedAt   DateTime @updatedAt
+}
+
 model Ping {
     id Int @id
     domain String
     probes Int
     result Json
 }
-
-
